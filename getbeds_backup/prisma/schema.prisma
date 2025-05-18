@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  phoneNumber String
+  name        String
+  password    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userRoleId  String
+  Session     Session[]
+  role        UserRole  @relation(fields: [userRoleId], references: [id])
+
+  @@index([email, phoneNumber])
+}
+
+model Hospital {
+  id                 String @id @default(cuid())
+  hospitalName       String
+  location           String
+  description        String
+  emergencyContact   String
+  phoneNumber        String
+  email              String
+  localManagerName   String
+  localManagerEmail  String
+  localManagerPhone  String
+  cancellationPolicy String
+  termsAndConditions String
+  PropertyRules      String
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  expires     DateTime
+  accessToken String   @unique
+  loginTime   DateTime @default(now())
+  LogoutTime  DateTime @default(now())
+  deviceId    String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User[]
+}
